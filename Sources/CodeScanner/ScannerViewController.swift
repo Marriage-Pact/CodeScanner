@@ -476,5 +476,17 @@ extension CodeScannerView {
             parentView.completion(.failure(reason))
         }
         
+        // TODO: add this to handle the view appearing again?
+//        func resumedViewingScanner() {
+//            self.addOrientationDidChangeObserver()
+//            // TODO: resume capture.
+//
+//            if (captureSession?.isRunning == false) {
+//                DispatchQueue.global(qos: .userInteractive).async {
+//                    self.captureSession?.startRunning()
+//                }
+//            }
+//        }
+        
     }
 }
