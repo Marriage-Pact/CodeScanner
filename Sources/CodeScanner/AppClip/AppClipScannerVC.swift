@@ -10,7 +10,7 @@ import RealityKit
 import ARKit
 import Combine
 import SwiftUI
-import CodeScanner
+//import CodeScanner
 
 public struct AppClipScannerView: UIViewControllerRepresentable {
     
@@ -35,7 +35,7 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
     
     init(parentView: AppClipScannerView) {
         self.parentView = parentView
-        appClipCodeCoachingOverlay = AppClipCodeCoachingOverlayView(parentView: arView)
+//        appClipCodeCoachingOverlay = AppClipCodeCoachingOverlayView(parentView: arView)
         informationLabel = OverlayLabel()
         super.init(nibName: nil, bundle: nil)
     }
@@ -45,7 +45,7 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
     }
     
     let arView = ARView()
-    var appClipCodeCoachingOverlay: AppClipCodeCoachingOverlayView
+//    var appClipCodeCoachingOverlay: AppClipCodeCoachingOverlayView
     var informationLabel: OverlayLabel
 //    var unsupportedDeviceLabel: UILabel
     let coachingOverlayWorldTracking = ARCoachingOverlayView()
