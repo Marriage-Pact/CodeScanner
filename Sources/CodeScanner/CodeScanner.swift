@@ -29,6 +29,12 @@ public enum ScanError: Error {
 /// it will report the exact code type that was found.
 @available(macCatalyst 14.0, *)
 public struct ScanResult {
+    
+    public init(string: String, type: AVMetadataObject.ObjectType) {
+        self.string = string
+        self.type = type
+    }
+    
     /// The contents of the code.
     public let string: String
 
