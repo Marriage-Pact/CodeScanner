@@ -43,7 +43,7 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
     init(parentView: AppClipScannerView) {
         self.parentView = parentView
 //        appClipCodeCoachingOverlay = AppClipCodeCoachingOverlayView(parentView: arView)
-        informationLabel = OverlayLabel()
+//        informationLabel = OverlayLabel()
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -51,11 +51,13 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
         fatalError("init(coder:) has not been implemented")
     }
     
-    private let arView = ARView()
+    /// These are expensive inits, so wait to do it until later
+    private var arView: ARView?
+    private var coachingOverlayWorldTracking: ARCoachingOverlayView?
+
 //    var appClipCodeCoachingOverlay: AppClipCodeCoachingOverlayView
-    private var informationLabel: OverlayLabel
+//    private var informationLabel: OverlayLabel
 //    var unsupportedDeviceLabel: UILabel
-    private let coachingOverlayWorldTracking = ARCoachingOverlayView()
     
     var decodedURLs: [URL] = []
 
@@ -69,9 +71,9 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
 //            return
 //        }
         
-        initializeARView()
-        initializeCoachingOverlays()
-        initializeInformationLabel()
+        initializeARView(doOneTimeInits: true)
+//        initializeCoachingOverlays()
+//        initializeInformationLabel()
         
 //        if
 //            let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -155,12 +157,15 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
         }
        
         let errorMessage = messages.compactMap({ $0 }).joined(separator: "\n")
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
             // Present an alert informing about the error that occurred.
             let alertController = UIAlertController(title: "The AR session failed.", message: errorMessage, preferredStyle: .alert)
             let restartAction = UIAlertAction(title: "Restart Session", style: .default) { _ in
                 alertController.dismiss(animated: true, completion: nil)
-                self.runARSession()
+                if let arView = self.arView {
+                    self.runARSession(arView: arView)
+                }
             }
             alertController.addAction(restartAction)
             self.present(alertController, animated: true, completion: nil)
@@ -203,23 +208,37 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
         unsupportedDeviceLabel.lineBreakMode = .byWordWrapping
     }
     */
-    func initializeARView() {
-        UIApplication.shared.isIdleTimerDisabled = true
-        
-        arView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(arView)
-        arView.fillParentView()
-        
-        arView.session.delegate = self
+    
+    
+    private func initializeARView(doOneTimeInits: Bool) {
+        NotificationCenter.default.post(name: .ARSessionLoadingState, object: ARSessionLoadingStateUpdate(isLoading: true))
         
         DispatchQueue.global(qos: .userInitiated).async {
             DispatchQueue.main.async { [weak self] in
-                self?.runARSession()
+                UIApplication.shared.isIdleTimerDisabled = true
+                
+                guard let self else { return }
+                
+                if doOneTimeInits {
+                    let arView = ARView()
+                    arView.translatesAutoresizingMaskIntoConstraints = false
+                    view.addSubview(arView)
+                    arView.fillParentView()
+                    
+                    arView.session.delegate = self
+                    
+                    initializeCoachingOverlays(arView: arView)
+//                    initializeInformationLabel(arView: arView)
+                }
+                if let arView {
+                    self.runARSession(arView: arView)
+                }
             }
         }
     }
     
-    private func runARSession(withAdditionalReferenceImages additionalReferenceImages: Set<ARReferenceImage> = Set<ARReferenceImage>()) {
+    private func runARSession(arView: ARView,
+                              withAdditionalReferenceImages additionalReferenceImages: Set<ARReferenceImage> = Set<ARReferenceImage>()) {
         
         NotificationCenter.default.post(name: .ARSessionLoadingState, object: ARSessionLoadingStateUpdate(isLoading: true))
         
@@ -250,9 +269,10 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
         NotificationCenter.default.post(name: .ARSessionLoadingState, object: ARSessionLoadingStateUpdate(isLoading: false))
     }
     
-    func initializeCoachingOverlays() {
+    func initializeCoachingOverlays(arView: ARView) {
 //        appClipCodeCoachingOverlay = AppClipCodeCoachingOverlayView(parentView: arView)
-        
+        let coachingOverlayWorldTracking = ARCoachingOverlayView()
+        self.coachingOverlayWorldTracking = coachingOverlayWorldTracking
         arView.addSubview(coachingOverlayWorldTracking)
         coachingOverlayWorldTracking.translatesAutoresizingMaskIntoConstraints = false
         coachingOverlayWorldTracking.fillParentView()
@@ -260,29 +280,29 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
         coachingOverlayWorldTracking.session = arView.session
     }
     
-    func initializeInformationLabel() {
+//    func initializeInformationLabel(arView: ARView) {
 //        informationLabel = OverlayLabel()
-        arView.addSubview(informationLabel)
-        informationLabel.lowerCenterInParentView()
-    }
+//        arView.addSubview(informationLabel)
+//        informationLabel.lowerCenterInParentView()
+//    }
     
-    func showInformationLabel(_ message: String) {
-        DispatchQueue.main.async { [weak self] in
-            debugPrint(message)
-            if let isCoachingActive = self?.coachingOverlayWorldTracking.isActive, !isCoachingActive {
-                self?.setInformationLabelHidden(false)
-                self?.informationLabel.text = message
-            }
-        }
-    }
+//    func showInformationLabel(_ message: String) {
+//        DispatchQueue.main.async { [weak self] in
+//            debugPrint(message)
+//            if let isCoachingActive = self?.coachingOverlayWorldTracking?.isActive, !isCoachingActive {
+//                self?.setInformationLabelHidden(false)
+//                self?.informationLabel.text = message
+//            }
+//        }
+//    }
     
-    func setInformationLabelHidden(_ hide: Bool) {
-        DispatchQueue.main.async { [weak self] in
-            UIView.animate(withDuration: 0.25, delay: 0, options: [.beginFromCurrentState], animations: { [weak self] in
-                self?.informationLabel.alpha = hide ? 0 : 1
-            })
-        }
-    }
+//    func setInformationLabelHidden(_ hide: Bool) {
+//        DispatchQueue.main.async { [weak self] in
+//            UIView.animate(withDuration: 0.25, delay: 0, options: [.beginFromCurrentState], animations: { [weak self] in
+//                self?.informationLabel.alpha = hide ? 0 : 1
+//            })
+//        }
+//    }
     
     public func coachingOverlayViewWillActivate(_ coachingOverlayView: ARCoachingOverlayView) {
 //        appClipCodeCoachingOverlay.setCoachingViewHidden(true)
@@ -297,7 +317,7 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
     
     public func coachingOverlayViewDidRequestSessionReset(_ coachingOverlayView: ARCoachingOverlayView) {
         hasSentInitialLoadingStateNotification = false
-        initializeARView()
+        initializeARView(doOneTimeInits: false)
     }
     
     public override var prefersHomeIndicatorAutoHidden: Bool {

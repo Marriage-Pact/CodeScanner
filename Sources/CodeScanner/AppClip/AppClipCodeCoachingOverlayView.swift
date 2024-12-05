@@ -4,7 +4,7 @@ See the LICENSE.txt file for this sample’s licensing information.
 Abstract:
 An object that presents the user with textual instructions to guide them through the App Clip Code scanning process.
 */
-
+/*
 import UIKit
 import ARKit
 import RealityKit
@@ -40,3 +40,4 @@ final class AppClipCodeCoachingOverlayView: UILabel {
         super.init(frame: .zero)
     }
 }
+*/
