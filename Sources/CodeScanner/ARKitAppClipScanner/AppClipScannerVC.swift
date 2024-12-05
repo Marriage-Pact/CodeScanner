@@ -184,32 +184,6 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
         return false
     }
     
-    /*
-    func displayUnsupportedDevicePrompt() {
-        let promptText =
-            """
-            Device not supported
-            
-            App Clip Code tracking
-            requires a device
-            with an Apple Neural Engine.
-            """
-        unsupportedDeviceLabel = UILabel()
-        unsupportedDeviceLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.insertSubview(unsupportedDeviceLabel, at: 0)
-        unsupportedDeviceLabel.fillParentView()
-        unsupportedDeviceLabel.backgroundColor  = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
-        unsupportedDeviceLabel.adjustsFontSizeToFitWidth = false
-        unsupportedDeviceLabel.textColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
-        unsupportedDeviceLabel.text = promptText
-        unsupportedDeviceLabel.font = UIFont.preferredFont(forTextStyle: .headline)
-        unsupportedDeviceLabel.textAlignment = .center
-        unsupportedDeviceLabel.numberOfLines = 0
-        unsupportedDeviceLabel.lineBreakMode = .byWordWrapping
-    }
-    */
-    
-    
     private func initializeARView(doOneTimeInits: Bool) {
         NotificationCenter.default.post(name: .ARSessionLoadingState, object: ARSessionLoadingStateUpdate(isLoading: true))
         
@@ -231,8 +205,11 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
                     initializeCoachingOverlays(arView: arView)
 //                    initializeInformationLabel(arView: arView)
                 }
+                
                 if let arView {
                     self.runARSession(arView: arView)
+                } else {
+                    print("Not running the AR session")
                 }
             }
         }
@@ -264,11 +241,11 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
     
     private var hasSentInitialLoadingStateNotification: Bool = false
     
-//    public func session(_ session: ARSession, didUpdate frame: ARFrame) {
-//        guard hasSentInitialLoadingStateNotification == false else { return }
-//        hasSentInitialLoadingStateNotification = true
-//        NotificationCenter.default.post(name: .ARSessionLoadingState, object: ARSessionLoadingStateUpdate(isLoading: false))
-//    }
+    public func session(_ session: ARSession, didUpdate frame: ARFrame) {
+        guard hasSentInitialLoadingStateNotification == false else { return }
+        hasSentInitialLoadingStateNotification = true
+        NotificationCenter.default.post(name: .ARSessionLoadingState, object: ARSessionLoadingStateUpdate(isLoading: false))
+    }
     
     func initializeCoachingOverlays(arView: ARView) {
 //        appClipCodeCoachingOverlay = AppClipCodeCoachingOverlayView(parentView: arView)
