@@ -22,6 +22,7 @@ extension Notification.Name {
 public struct AppClipScannerView: UIViewControllerRepresentable {
     
     public init(completion: @escaping (Result<ScanResult, ScanError>) -> Void) {
+        NotificationCenter.default.post(name: .ARSessionLoadingState, object: ARSessionLoadingStateUpdate(isLoading: true))
         self.completion = completion
     }
     
