@@ -241,6 +241,8 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
     
     private var hasSentInitialLoadingStateNotification: Bool = false
     
+    /// We use this to detect that the AR session has finished loading and we need to remove the loading spinner
+    ///
     public func session(_ session: ARSession, didUpdate frame: ARFrame) {
         guard hasSentInitialLoadingStateNotification == false else { return }
         hasSentInitialLoadingStateNotification = true
