@@ -221,6 +221,7 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
                 
                 if doOneTimeInits {
                     let arView = ARView()
+                    self.arView = arView
                     arView.translatesAutoresizingMaskIntoConstraints = false
                     view.addSubview(arView)
                     arView.fillParentView()
