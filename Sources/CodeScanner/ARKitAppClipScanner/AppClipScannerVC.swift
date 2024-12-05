@@ -51,6 +51,11 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
         fatalError("init(coder:) has not been implemented")
     }
     
+    override public func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        self.arView?.session.pause()
+    }
+    
     /// These are expensive inits, so wait to do it until later
     private var arView: ARView?
     private var coachingOverlayWorldTracking: ARCoachingOverlayView?
