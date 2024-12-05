@@ -10,7 +10,14 @@ import RealityKit
 import ARKit
 import Combine
 import SwiftUI
-//import CodeScanner
+
+public struct ARSessionLoadingStateUpdate {
+    let isLoading: Bool
+}
+
+extension Notification.Name {
+    public static let ARSessionLoadingState = Notification.Name("ARSessionLoadingState")
+}
 
 public struct AppClipScannerView: UIViewControllerRepresentable {
     
@@ -44,37 +51,14 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
         fatalError("init(coder:) has not been implemented")
     }
     
-    let arView = ARView()
+    private let arView = ARView()
 //    var appClipCodeCoachingOverlay: AppClipCodeCoachingOverlayView
-    var informationLabel: OverlayLabel
+    private var informationLabel: OverlayLabel
 //    var unsupportedDeviceLabel: UILabel
-    let coachingOverlayWorldTracking = ARCoachingOverlayView()
+    private let coachingOverlayWorldTracking = ARCoachingOverlayView()
     
-//    var useTestURL = false
-    ///- Tag: TestAppClipCodeURL
-//    var testAppClipCodeURL = URL(string: "https://developer.apple.com/sunfl")!
     var decodedURLs: [URL] = []
-//    var detectionImageSet = Set<ARReferenceImage>()
-    
-    /* The model URL for App Clip Code URL-path-component dictionary.
-     To enable the app to preview more grown plants, add entries to `modelForURL` for
-     each additional grown plant. */
-    ///- Tag: ModelURLFor
-//    let modelURLFor: [String: URL] = [
-//        "sunfl": URL(string: "https://developer.apple.com/sample-code/ar/sunflower.usdz")!
-//    ]
-//    var modelFor: [String: Entity] = [:]
-    
-    /* The image URL for App Clip Code URL-path-component dictionary.
-     To enable the app to preview more grown plants, add entries to `imageForURL` for
-     each additional seed packet. */
-    ///- Tag: ImageURLFor
-    ///
-//    let imageURLFor: [String: URL] = [
-//        "sunfl": URL(string: "https://developer.apple.com/sample-code/ar/sunflower.jpg")!
-//    ]
-//    var imageAnchorFor: [String: AnchorEntity] = [:]
-    
+
     /// - Tag: ViewDidLoad
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -101,14 +85,15 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
     
     /// Hides the instruction prompt once the user has detected an app clip code.
     ///- Tag: SessionDidAddAnchors
-    public func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
-        for anchor in anchors {
-            if anchor is ARAppClipCodeAnchor {
+//    public func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
+//        for anchor in anchors {
+//            if anchor is ARAppClipCodeAnchor {
                 // Hide the coaching overlay since ARKit recognized an App Clip Code.
 //                appClipCodeCoachingOverlay.setCoachingViewHidden(true)
-            }
-        }
-    }
+//            }
+//        }
+//    }
+    
     ///- Tag: SessionDidUpdateAnchors
     public func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
         for anchor in anchors {
@@ -226,10 +211,17 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
         arView.fillParentView()
         
         arView.session.delegate = self
-        runARSession()
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            DispatchQueue.main.async { [weak self] in
+                self?.runARSession()
+            }
+        }
     }
     
-    func runARSession(withAdditionalReferenceImages additionalReferenceImages: Set<ARReferenceImage> = Set<ARReferenceImage>()) {
+    private func runARSession(withAdditionalReferenceImages additionalReferenceImages: Set<ARReferenceImage> = Set<ARReferenceImage>()) {
+        
+        NotificationCenter.default.post(name: .ARSessionLoadingState, object: ARSessionLoadingStateUpdate(isLoading: true))
         
         self.resetDecodedUrls()
         
@@ -248,6 +240,14 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
             newConfiguration.appClipCodeTrackingEnabled = true
             arView.session.run(newConfiguration)
         }
+    }
+    
+    private var hasSentInitialLoadingStateNotification: Bool = false
+    
+    public func session(_ session: ARSession, didUpdate frame: ARFrame) {
+        guard hasSentInitialLoadingStateNotification == false else { return }
+        hasSentInitialLoadingStateNotification = true
+        NotificationCenter.default.post(name: .ARSessionLoadingState, object: ARSessionLoadingStateUpdate(isLoading: false))
     }
     
     func initializeCoachingOverlays() {
@@ -296,6 +296,7 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
     }
     
     public func coachingOverlayViewDidRequestSessionReset(_ coachingOverlayView: ARCoachingOverlayView) {
+        hasSentInitialLoadingStateNotification = false
         initializeARView()
     }
     
