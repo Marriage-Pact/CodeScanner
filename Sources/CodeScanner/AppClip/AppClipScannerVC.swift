@@ -162,6 +162,13 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
             errorWithInfo.localizedFailureReason,
             errorWithInfo.localizedRecoverySuggestion
         ]
+        
+        guard Self.IsCameraPermissionError(error) == false else {
+            /// This error is handled by showing the go to settings button
+            self.parentView.completion(.failure(ScanError.permissionDenied))
+            return
+        }
+       
         let errorMessage = messages.compactMap({ $0 }).joined(separator: "\n")
         DispatchQueue.main.async {
             // Present an alert informing about the error that occurred.
@@ -174,6 +181,19 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
             self.present(alertController, animated: true, completion: nil)
         }
     }
+    
+    private static func IsCameraPermissionError(_ error: Error) -> Bool {
+        if let asArError = error as? ARError {
+            switch asArError.code {
+            case .cameraUnauthorized:
+                return true
+            default:
+                return false
+            }
+        }
+        return false
+    }
+    
     /*
     func displayUnsupportedDevicePrompt() {
         let promptText =
