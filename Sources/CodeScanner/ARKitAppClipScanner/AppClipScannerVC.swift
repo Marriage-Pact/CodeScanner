@@ -54,6 +54,7 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
     override public func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         self.arView?.session.pause()
+        UIApplication.shared.isIdleTimerDisabled = false
     }
     
     /// These are expensive inits, so wait to do it until later
