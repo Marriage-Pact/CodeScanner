@@ -263,11 +263,11 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
     
     private var hasSentInitialLoadingStateNotification: Bool = false
     
-    public func session(_ session: ARSession, didUpdate frame: ARFrame) {
-        guard hasSentInitialLoadingStateNotification == false else { return }
-        hasSentInitialLoadingStateNotification = true
-        NotificationCenter.default.post(name: .ARSessionLoadingState, object: ARSessionLoadingStateUpdate(isLoading: false))
-    }
+//    public func session(_ session: ARSession, didUpdate frame: ARFrame) {
+//        guard hasSentInitialLoadingStateNotification == false else { return }
+//        hasSentInitialLoadingStateNotification = true
+//        NotificationCenter.default.post(name: .ARSessionLoadingState, object: ARSessionLoadingStateUpdate(isLoading: false))
+//    }
     
     func initializeCoachingOverlays(arView: ARView) {
 //        appClipCodeCoachingOverlay = AppClipCodeCoachingOverlayView(parentView: arView)
