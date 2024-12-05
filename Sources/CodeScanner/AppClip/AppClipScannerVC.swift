@@ -87,14 +87,14 @@ public final class AppClipScannerVC: UIViewController, ARSessionDelegate, ARCoac
     
     /// Hides the instruction prompt once the user has detected an app clip code.
     ///- Tag: SessionDidAddAnchors
-//    public func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
-//        for anchor in anchors {
-//            if anchor is ARAppClipCodeAnchor {
-                // Hide the coaching overlay since ARKit recognized an App Clip Code.
+    public func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
+        for anchor in anchors {
+            if anchor is ARAppClipCodeAnchor {
+//                 Hide the coaching overlay since ARKit recognized an App Clip Code.
 //                appClipCodeCoachingOverlay.setCoachingViewHidden(true)
-//            }
-//        }
-//    }
+            }
+        }
+    }
     
     ///- Tag: SessionDidUpdateAnchors
     public func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
