@@ -12,7 +12,7 @@ import Combine
 import SwiftUI
 
 public struct ARSessionLoadingStateUpdate {
-    let isLoading: Bool
+    public let isLoading: Bool
 }
 
 extension Notification.Name {
